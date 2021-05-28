@@ -19,11 +19,11 @@ import javax.swing.Timer;
  */
 public class Tetris extends JPanel {
 
-    private static int width, height, sqHW, margin, blockHeight, blockWidth, currentPiece, rotation;
+    private static int width, height, sqHW, margin, blockHeight, blockWidth, currentPiece = 8, rotation;
 
     private ArrayList<Integer> nextPieces = new ArrayList<Integer>();
 
-    Color[] tetrisColor = {Color.decode("#00ffff"), Color.decode("#FFD500"), Color.decode("#0341AE"), Color.decode("#72CB3B"), Color.decode("#FF971C"), Color.decode("#FF3213"), Color.decode("#FBECD5")};
+    Color[] tetrisColor = {Color.decode("#00ffff"), Color.decode("#FFD500"), Color.decode("#0341AE"), Color.decode("#72CB3B"), Color.decode("#FF971C"), Color.decode("#FF3213"), Color.decode("#FBECD5"), Color.decode("#00000")};
 
     private final Point[][][] Tetraminos = {
         // I-Piece
@@ -63,10 +63,10 @@ public class Tetris extends JPanel {
         },
         // T-Piece
         {
-            {new Point(1, 0), new Point(0, 1), new Point(1, 1), new Point(2, 1)},
-            {new Point(1, 0), new Point(0, 1), new Point(1, 1), new Point(1, 2)},
             {new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(1, 2)},
-            {new Point(1, 0), new Point(1, 1), new Point(2, 1), new Point(1, 2)}
+            {new Point(1, 0), new Point(1, 1), new Point(2, 1), new Point(1, 2)},
+            {new Point(1, 0), new Point(0, 1), new Point(1, 1), new Point(1, 2)},
+            {new Point(1, 0), new Point(0, 1), new Point(1, 1), new Point(2, 1)}
         },
         // Z-Piece
         {
@@ -74,8 +74,16 @@ public class Tetris extends JPanel {
             {new Point(1, 0), new Point(0, 1), new Point(1, 1), new Point(0, 2)},
             {new Point(0, 0), new Point(1, 0), new Point(1, 1), new Point(2, 1)},
             {new Point(1, 0), new Point(0, 1), new Point(1, 1), new Point(0, 2)}
+        },
+        // Z-Piece
+        {
+            {new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0)},
+            {new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0)},
+            {new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0)},
+            {new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0)}
         }
     };
+
     int score = 0;
     private Color[][] well;
     Point pieceOrigin;
@@ -83,6 +91,19 @@ public class Tetris extends JPanel {
     int distance;
     Timer timer;
     boolean isAbleToMove;
+    int nextPieceI;
+    String status = "PAUSE";
+    int gameLevel = 1;
+
+    public Tetris(Color[][] well, Point pieceOrigin, nextTetris nextTetris, int distance, Timer timer, boolean isAbleToMove, int nextPieceI) {
+        this.well = well;
+        this.pieceOrigin = pieceOrigin;
+        this.nextTetris = nextTetris;
+        this.distance = distance;
+        this.timer = timer;
+        this.isAbleToMove = isAbleToMove;
+        this.nextPieceI = nextPieceI;
+    }
 
     public Tetris() {
         isAbleToMove = false;
@@ -104,8 +125,9 @@ public class Tetris extends JPanel {
                 }
             }
         }
+
         nextPiece();
-        timer = new Timer(1000, (e) -> {
+        timer = new Timer(1000 / gameLevel, (e) -> {
             moveDown();
             repaint();
         });
@@ -115,16 +137,20 @@ public class Tetris extends JPanel {
         pieceOrigin = new Point(5, 1);
         distance = 0;
         int nPieces = nextPieces.size();
-        if (nPieces == 0 || nPieces - 1 == 0) {
-            Collections.addAll(nextPieces, 0, 1, 2, 3, 4, 5, 6);
-            Collections.shuffle(nextPieces);
+        if (nPieces == 0 || nPieces - 2 == 0) {
+            ArrayList<Integer> tempList = new ArrayList<Integer>();
+            Collections.addAll(tempList, 0, 1, 2, 3, 4, 5, 6);
+            Collections.shuffle(tempList);
+            nextPieces.addAll(tempList);
+            currentPiece = nextPieces.get(0);
+            nextPieceI = nextPieces.get(1);
+            nextPieces.remove(0);
+        } else {
+            currentPiece = nextPieces.get(0);
+            nextPieceI = nextPieces.get(1);
+            nextPieces.remove(0);
         }
-        currentPiece = nextPieces.get(0);
-        nextPieces.remove(0);
-    }
 
-    public JPanel getNextPanel() {
-        return nextTetris;
     }
 
     private void createWall(Graphics g) {
@@ -161,7 +187,9 @@ public class Tetris extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         createWall(g);
-        drawPiece(g);
+        if (!this.status.equals("PAUSE")) {
+            drawPiece(g);
+        }
         createLines(g);
     }
 
@@ -204,6 +232,13 @@ public class Tetris extends JPanel {
         }
         if (!collidesAt(pieceOrigin.x, pieceOrigin.y, newRotation)) {
             rotation = newRotation;
+        } else {
+            if (pieceOrigin.x + 1 >= 10) {
+                pieceOrigin.x--;
+            } else if (pieceOrigin.x - 1 <= 1) {
+                pieceOrigin.x++;
+            }
+            rotate(i);
         }
         repaint();
     }
@@ -215,6 +250,7 @@ public class Tetris extends JPanel {
             }
         }
     }
+    double clearCounter = 0;
 
     public void clearRows() {
         boolean gap;
@@ -232,6 +268,7 @@ public class Tetris extends JPanel {
                 deleteRow(y);
                 y += 1;
                 numClears += 1;
+                clearCounter += ((numClears * .5));
             }
         }
         switch (numClears) {
@@ -248,6 +285,13 @@ public class Tetris extends JPanel {
                 score += 800;
                 break;
         }
+        if (score > 0 && clearCounter >= 1.00) {
+            gameLevel += 100;
+            double delay = (1000 - gameLevel);
+            timer.setDelay((int) delay);
+            clearCounter = 0;
+        }
+        System.out.println(clearCounter + " d: " + timer.getDelay());
     }
 
     public void move(String s) {
@@ -283,21 +327,27 @@ public class Tetris extends JPanel {
     }
 
     public int getNextPiece() {
-        return nextPieces.get(currentPiece);
+        return nextPieceI;
     }
-public ArrayList getLists() {
-    return nextPieces;
-}
+
+//    public ArrayList getLists() {
+//        return nextPieces;
+//    }
     public Color getNextColor() {
-        return tetrisColor[currentPiece];
+        return tetrisColor[nextPieceI];
     }
-    String status;
+    boolean restart = false;
 
     public void startPause() {
+        if (restart) {
+            nextPiece();
+            restart = true;
+        }
         if (status == null || status.equals("PAUSE")) {
             timer.start();
             isAbleToMove = true;
             status = "START";
+            repaint();
         } else {
             timer.stop();
             isAbleToMove = false;
@@ -317,5 +367,9 @@ public ArrayList getLists() {
         status = "PAUSE";
         initWall();
         repaint();
+        currentPiece = 7;
+        gameLevel = 1;
+        restart = true;
+        nextPieceI = 7;
     }
 }
