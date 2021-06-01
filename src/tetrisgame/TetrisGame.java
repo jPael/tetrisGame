@@ -8,6 +8,7 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -18,19 +19,32 @@ import javax.swing.Timer;
 
 public class TetrisGame extends JFrame {
 
+    /*
+    this part is where instantiate the:
+    frame where we can use to display our GUI
+    frameH also known as frame height
+    frameW also known as frame width
+    Dimenson frameSize we use this variable to hold the height and width value of our frameH, and frameW respectively
+     */
     JFrame frame;
     int frameH, frameW;
     Dimension frameSize;
 
+    /*
+this is the part where we call the constructor to initialize our variables above    
+     */
     public TetrisGame() {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        /*
+        in here, we are gonna put the height and width value to our frameH and frameW
+        then we are gonna initialize the frameSize with the value of frameH and frameW
+        then 
+         */
         frameW = 530;
-        frameH = (int) (screenSize.height * 0.9);
+        frameH = 777;
         frameSize = new Dimension(frameW, frameH);
-        frame = new JFrame();
 
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
 
         panelLayout();
 
@@ -39,6 +53,7 @@ public class TetrisGame extends JFrame {
     Timer updateScore;
 
     public void panelLayout() {
+        nextTetris nextTetris = new nextTetris();
         tetris = new Tetris();
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());
@@ -69,6 +84,7 @@ public class TetrisGame extends JFrame {
         nextLabel.setFont(new Font("san serif", Font.BOLD, 25));
         nextLabel.setBorder(BorderFactory.createEmptyBorder(10, 50, 0, 50));
 //        JPanel nextTetris = tetris.nextTetris();
+        nextPanel.add(nextTetris, BorderLayout.CENTER);
         nextPanel.add(nextLabel, BorderLayout.NORTH);
         nextPanel.setSize(150, 150);
 //----------------------------------        
@@ -101,16 +117,24 @@ public class TetrisGame extends JFrame {
         restart_button.setFocusable(false);
 
         restart_button.addActionListener(e -> {
+            updateScore.stop();
             tetris.restart();
             pause_button.setText("Play");
+
+            final Color c = tetris.getNextColor();
+            final int currentI = tetris.getNextPiece();
         });
 
-        JButton Exit_button = new JButton("Exit");
-        Exit_button.setFocusable(false);
+        JButton exit_button = new JButton("Exit");
+        exit_button.setFocusable(false);
+
+        exit_button.addActionListener(e -> {
+            System.exit(0);
+        });
 
         actionButtons.add(pause_button);
         actionButtons.add(restart_button);
-        actionButtons.add(Exit_button);
+        actionButtons.add(exit_button);
 //----------------------------------    
         scoreboard.add(nextPanel);
         scoreboard.add(scorePanel);
@@ -121,7 +145,7 @@ public class TetrisGame extends JFrame {
         contentPanel.add(tetris, BorderLayout.CENTER);
         contentPanel.add(scoreboard, BorderLayout.EAST);
 
-        frame.addKeyListener(new KeyAdapter() {
+        addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 int key = e.getKeyCode();
@@ -140,24 +164,27 @@ public class TetrisGame extends JFrame {
             }
         });
 
-        frame.add(contentPanel);
-        frame.setAlwaysOnTop(true);
-        frame.setResizable(false);
-        frame.setSize(frameSize);
-        frame.setLocationRelativeTo(null);
+        add(contentPanel);
+        setAlwaysOnTop(true);
+        setResizable(false);
+        setSize(frameSize);
+        setLocationRelativeTo(null);
 
         updateScore = new Timer(1000 / 60, e -> {
             int score = tetris.getScore();
             scoreLabel.setText(score + "");
 
-            nextTetris nextTetris = new nextTetris(tetris.getLists(), tetris.getNextPiece(), tetris.getNextColor());
-            nextPanel.add(nextTetris, BorderLayout.CENTER);
+//            final ArrayList<Integer> lists = tetris.getLists();
+            final Color c = tetris.getNextColor();
+            final int currentI = tetris.getNextPiece();
 
+            nextTetris.update(currentI, c);
         });
     }
 
     public static void main(String[] args) {
         new TetrisGame();
-    }   
+
+    }
 
 }

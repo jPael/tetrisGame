@@ -20,12 +20,13 @@ import javax.swing.Timer;
  */
 public class nextTetris extends JPanel {
 
+    //borderHeight is the amount of boxes that can be fitted vertically
+    //borderWidth is the amounth of boxes that can be fitted horizontally
     int borderHeight = 8, borderWidth = 8, sqHW, width, height;
     Color wells[][];
     Point pieceOrigin = new Point(2, 2);
-    Color currentColor;
-    int currentI;
-    private ArrayList<Integer> nextPieces = new ArrayList<Integer>();
+    Color currentColor = Color.BLACK;
+    int currentI = 7;
     private final Point[][][] Tetraminos = {
         // I-Piece
         {
@@ -75,16 +76,18 @@ public class nextTetris extends JPanel {
             {new Point(1, 0), new Point(0, 1), new Point(1, 1), new Point(0, 2)},
             {new Point(0, 0), new Point(1, 0), new Point(1, 1), new Point(2, 1)},
             {new Point(1, 0), new Point(0, 1), new Point(1, 1), new Point(0, 2)}
+        },
+        // all black
+        {
+            {new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0)},
+            {new Point(0, 0), new Point(0, 1), new Point(0, 0), new Point(0, 0)},
+            {new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0)},
+            {new Point(0, 0), new Point(0, 1), new Point(0, 0), new Point(0, 0)}
         }
     };
-//    boolean a = true;
 
-    public nextTetris(ArrayList list, int i, Color c) {
+    public nextTetris() {
         initWalls();
-        this.currentI = i;
-        this.currentColor = c;
-        this.nextPieces = list;
-        System.out.println("Lists: " + nextPieces + " Current I: "+ currentI+" Current Color: " + c);
     }
 
     @Override
@@ -134,10 +137,23 @@ public class nextTetris extends JPanel {
 
     public void draw(Graphics g) {
         g.setColor(currentColor);
-        System.out.println("this i is now being drawn" + this.currentI);
         for (Point p : Tetraminos[this.currentI][1]) {
             g.fillRect((p.x + pieceOrigin.x) * sqHW, (p.y + pieceOrigin.y) * sqHW, sqHW, sqHW);
         }
+    }
+
+    public void update(int i, Color c) {
+        this.currentI = i;
+        this.currentColor = c;
+        repaint();
+    }
+
+    public void restart(String s) {
+        System.err.println(s);
+        this.currentI = 7;
+        this.currentColor = Color.BLACK;
+
+        repaint();
     }
 
 }
