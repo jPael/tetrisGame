@@ -121,8 +121,7 @@ this is the part where we call the constructor to initialize our variables above
             tetris.restart();
             pause_button.setText("Play");
 
-            final Color c = tetris.getNextColor();
-            final int currentI = tetris.getNextPiece();
+            nextTetris.restart("update upon restart!");
         });
 
         JButton exit_button = new JButton("Exit");
