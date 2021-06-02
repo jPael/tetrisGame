@@ -16,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
+import javax.swing.UIManager;
 
 public class TetrisGame extends JFrame {
 
@@ -29,6 +30,7 @@ public class TetrisGame extends JFrame {
     JFrame frame;
     int frameH, frameW;
     Dimension frameSize;
+    TetrisAudio audio;
 
     /*
 this is the part where we call the constructor to initialize our variables above    
@@ -48,6 +50,9 @@ this is the part where we call the constructor to initialize our variables above
 
         panelLayout();
 
+        audio = new TetrisAudio();
+        audio.playTheSound();
+
     }
     Tetris tetris;
     Timer updateScore;
@@ -55,18 +60,26 @@ this is the part where we call the constructor to initialize our variables above
     public void panelLayout() {
         nextTetris nextTetris = new nextTetris();
         tetris = new Tetris();
+        
+        
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());
-//--------------------------------------------------------------------------
-        JPanel header = new JPanel();
-        header.setLayout(new BorderLayout());
+        
+        
         Color tetrisC = Color.decode("#8105d8");
         Color GameC = Color.decode("#fe59d7");
+        
+        
+        JPanel header = new JPanel();
+        header.setLayout(new BorderLayout());
+        
+        
         JLabel TetrisTitle = new JLabel("Tetris ");
         TetrisTitle.setForeground(tetrisC);
         TetrisTitle.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         TetrisTitle.setFont(new Font("san serif", Font.BOLD, 25));
 
+        
         JLabel GameTitle = new JLabel("Game");
         GameTitle.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         GameTitle.setFont(new Font("san serif", Font.BOLD, 25));
@@ -74,72 +87,91 @@ this is the part where we call the constructor to initialize our variables above
         GameTitle.setBackground(GameC);
         GameTitle.setOpaque(true);
 
+        
         header.add(TetrisTitle, BorderLayout.LINE_START);
         header.add(GameTitle, BorderLayout.CENTER);
-//--------------------------------------------------------------------------
+        
+        
         JPanel scoreboard = new JPanel(new GridLayout(3, 1, 15, 15));
-//----------------------------------        
+        
         JPanel nextPanel = new JPanel(new BorderLayout());
         JLabel nextLabel = new JLabel("Next");
         nextLabel.setFont(new Font("san serif", Font.BOLD, 25));
         nextLabel.setBorder(BorderFactory.createEmptyBorder(10, 50, 0, 50));
-//        JPanel nextTetris = tetris.nextTetris();
         nextPanel.add(nextTetris, BorderLayout.CENTER);
         nextPanel.add(nextLabel, BorderLayout.NORTH);
         nextPanel.setSize(150, 150);
-//----------------------------------        
+        
         JPanel scorePanel = new JPanel(new BorderLayout());
         JLabel scoreHeader = new JLabel("Score", SwingConstants.CENTER);
         scoreHeader.setFont(new Font("san serif", Font.BOLD, 25));
         JLabel scoreLabel = new JLabel("0", SwingConstants.CENTER);
         scoreLabel.setFont(new Font("sans serif", Font.BOLD, 25));
 
+        
         scorePanel.add(scoreHeader, BorderLayout.NORTH);
         scorePanel.add(scoreLabel, BorderLayout.CENTER);
 
-//----------------------------------
+
         JPanel actionButtons = new JPanel(new GridLayout(3, 1, 10, 20));
+        
         JButton pause_button = new JButton("Play");
         pause_button.setFocusable(false);
+        pause_button.setBorderPainted(true);
+        pause_button.setFocusPainted(false);
+        pause_button.setContentAreaFilled(false);
 
         pause_button.addActionListener(e -> {
             tetris.startPause();
-            if (tetris.getStatus().equals("PAUSE")) {
-                pause_button.setText("Play");
-                updateScore.stop();
+            if (!tetris.getStatus()) {
+                pause_button.setText("PLAY");
+//                updateScore.stop();
             } else {
-                pause_button.setText("Pause");
-                updateScore.start();
+                pause_button.setText("PAUSE");
+                if (!updateScore.isRunning()) {
+                    updateScore.start();
+                }
             }
         });
 
-        JButton restart_button = new JButton("Restart");
+        
+        JButton restart_button = new JButton("RESTART");
+        restart_button.setBorderPainted(true);
+        restart_button.setFocusPainted(false);
+        restart_button.setContentAreaFilled(false);
         restart_button.setFocusable(false);
-
+        
         restart_button.addActionListener(e -> {
-            updateScore.stop();
+//            updateScore.stop();
             tetris.restart();
-            pause_button.setText("Play");
+            pause_button.setText("PLAY");
+            audio.stop();
+            audio.playTheSound();
 
-            nextTetris.restart("update upon restart!");
         });
 
+        
         JButton exit_button = new JButton("Exit");
         exit_button.setFocusable(false);
-
+        exit_button.setBorderPainted(true);
+        exit_button.setFocusPainted(false);
+        exit_button.setContentAreaFilled(false);
+        exit_button.setBackground(new Color(240, 240, 241));
+        
         exit_button.addActionListener(e -> {
             System.exit(0);
         });
 
+        
         actionButtons.add(pause_button);
         actionButtons.add(restart_button);
         actionButtons.add(exit_button);
-//----------------------------------    
+        
         scoreboard.add(nextPanel);
         scoreboard.add(scorePanel);
         scoreboard.add(actionButtons);
 
-//--------------------------------------------------------------------------
+        
         contentPanel.add(header, BorderLayout.NORTH);
         contentPanel.add(tetris, BorderLayout.CENTER);
         contentPanel.add(scoreboard, BorderLayout.EAST);
@@ -173,11 +205,10 @@ this is the part where we call the constructor to initialize our variables above
             int score = tetris.getScore();
             scoreLabel.setText(score + "");
 
-//            final ArrayList<Integer> lists = tetris.getLists();
             final Color c = tetris.getNextColor();
             final int currentI = tetris.getNextPiece();
 
-            nextTetris.update(currentI, c);
+            nextTetris.update(currentI, c, tetris.getStatus());
         });
     }
 

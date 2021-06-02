@@ -5,13 +5,16 @@
  */
 package tetrisgame;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import javax.sound.sampled.AudioFormat;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.URL;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 /**
  *
@@ -19,25 +22,44 @@ import javax.sound.sampled.SourceDataLine;
  */
 public class TetrisAudio {
 
-    AudioFormat audioFormat;
-    AudioInputStream audioInputStream;
-    SourceDataLine sourceDataLine;
-    File soundFile;
-    boolean playing = false;
+    private Clip clip;
 
     public TetrisAudio() {
+
+    }
+
+    private void SoundEffect(URL url) {
         try {
-            Path p = Paths.get("tetris_background.mp3");
-            System.out.println(p);
-            soundFile = new File(p.toString());
-            //   System.out.println(soundFile);
-            audioInputStream = AudioSystem.getAudioInputStream(soundFile);
-            audioFormat = audioInputStream.getFormat();
-//            System.out.println(audioFormat);
-        } catch (Exception e) {
-            System.out.println("Can't find the audio file!");
-            System.out.println(e);
+            // Set up an audio input stream piped from the sound file.
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(url);
+            // Get a clip resource.
+            clip = AudioSystem.getClip();
+            // Open audio clip and load samples from the audio input stream.
+            clip.open(audioInputStream);
+        } catch (UnsupportedAudioFileException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
         }
+    }
+
+// Play or Re-play the sound effect from the beginning, by rewinding.
+    public void playTheSound() {
+
+        URL url = getClass().getResource("tetris_background.wav");//You can change this to whatever other sound you have
+        SoundEffect(url);//this method will load the sound
+
+//        if (clip.isRunning()) {
+//            clip.stop();   // Stop the player if it is still running
+//        }
+        clip.setFramePosition(0); // rewind to the beginning
+        clip.start();     // Start playing
+        clip.loop(-1);
+    }
+    public void stop() {
+        clip.stop();
     }
 
 }

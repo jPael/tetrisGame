@@ -24,9 +24,10 @@ public class nextTetris extends JPanel {
     //borderWidth is the amounth of boxes that can be fitted horizontally
     int borderHeight = 8, borderWidth = 8, sqHW, width, height;
     Color wells[][];
-    Point pieceOrigin = new Point(2, 2);
+    Point pieceOrigin = new Point(3, 2);
     Color currentColor = Color.BLACK;
     int currentI = 7;
+    boolean playing = false;
     private final Point[][][] Tetraminos = {
         // I-Piece
         {
@@ -87,6 +88,7 @@ public class nextTetris extends JPanel {
     };
 
     public nextTetris() {
+
         initWalls();
     }
 
@@ -94,7 +96,9 @@ public class nextTetris extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         drawBorder(g);
-        draw(g);
+        if (playing) {
+            draw(g);
+        }
         drawLines(g);
 
     }
@@ -112,10 +116,62 @@ public class nextTetris extends JPanel {
         }
     }
 
+    private void wall_playmode() {
+        if (playing) {
+
+            for (int x = 0; x < wells.length; x++) {
+                for (int y = 0; y < wells[x].length; y++) {
+                    if (x == 0 || x == wells.length - 1 || y == 0 || y == wells[x].length - 1) {
+                        wells[x][y] = currentColor;
+                    }
+                }
+            }
+        } else if (!playing) {
+            for (int x = 0; x < wells.length; x++) {
+                for (int y = 0; y < wells[x].length; y++) {
+                    if (x == 0 || x == wells.length - 1 || y == 0 || y == wells[x].length - 1) {
+                        wells[x][y] = Color.GRAY;
+                    }
+                }
+            }
+        } else {
+            initWalls();
+        }
+        repaint();
+
+    }
+
     private void drawBorder(Graphics g) {
         width = getSize().width;
         height = getSize().height;
         sqHW = width / borderWidth;
+
+        if (playing) {
+            wall_playmode();
+
+            for (int x = 0; x < wells.length; x++) {
+                for (int y = 0; y < wells[x].length; y++) {
+                    g.setColor(wells[x][y]);
+                    g.fillRect(x * sqHW, y * sqHW, sqHW, sqHW);
+                }
+            }
+        } else if (!playing) {
+            wall_playmode();
+
+            for (int x = 0; x < wells.length; x++) {
+                for (int y = 0; y < wells[x].length; y++) {
+                    g.setColor(wells[x][y]);
+                    g.fillRect(x * sqHW, y * sqHW, sqHW, sqHW);
+                }
+            }
+        } else {
+            for (int x = 0; x < wells.length; x++) {
+                for (int y = 0; y < wells[x].length; y++) {
+                    g.setColor(wells[x][y]);
+                    g.fillRect(x * sqHW, y * sqHW, sqHW, sqHW);
+                }
+            }
+        }
 
         for (int x = 0; x < wells.length; x++) {
             for (int y = 0; y < wells[x].length; y++) {
@@ -142,17 +198,10 @@ public class nextTetris extends JPanel {
         }
     }
 
-    public void update(int i, Color c) {
+    public void update(int i, Color c, boolean playing) {
         this.currentI = i;
         this.currentColor = c;
-        repaint();
-    }
-
-    public void restart(String s) {
-        System.err.println(s);
-        this.currentI = 7;
-        this.currentColor = Color.BLACK;
-
+        this.playing = playing;
         repaint();
     }
 

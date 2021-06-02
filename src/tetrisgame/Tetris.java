@@ -18,7 +18,8 @@ import javax.swing.Timer;
  * @author jason
  */
 public class Tetris extends JPanel {
-
+    
+//all the points needed to create TETRAMINOS
     private final Point[][][] Tetraminos = {
         // I-Piece
         {
@@ -57,10 +58,10 @@ public class Tetris extends JPanel {
         },
         // T-Piece
         {
-            {new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(1, 2)},
             {new Point(1, 0), new Point(0, 1), new Point(1, 1), new Point(1, 2)},
             {new Point(1, 0), new Point(0, 1), new Point(1, 1), new Point(2, 1)},
-            {new Point(1, 0), new Point(1, 1), new Point(2, 1), new Point(1, 2)}
+            {new Point(1, 0), new Point(1, 1), new Point(2, 1), new Point(1, 2)},
+            {new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(1, 2)}
         },
         // Z-Piece
         {
@@ -77,9 +78,8 @@ public class Tetris extends JPanel {
             {new Point(0, 0), new Point(0, 0), new Point(0, 0), new Point(0, 0)}
         }
     };
-
-    private nextTetris nextTetris;
     private Point pieceOrigin;
+
     private int score = 0;
     private int gameLevel = 1;
     private int distance;
@@ -90,8 +90,9 @@ public class Tetris extends JPanel {
     private Timer timer;
 
     private boolean isAbleToMove;
+    boolean restart = true;
 
-    private String status = "PAUSE";
+    private boolean status = false;
 
     private Color[][] well;
     private Color[] tetrisColor = {Color.decode("#00ffff"), Color.decode("#FFD500"), Color.decode("#0341AE"), Color.decode("#72CB3B"), Color.decode("#FF971C"), Color.decode("#FF3213"), Color.decode("#FBECD5"), Color.decode("#00000")};
@@ -124,6 +125,29 @@ public class Tetris extends JPanel {
         });
     }
 
+    private void wall_playmode() {
+        if (status) {
+
+            for (int x = 0; x < well.length; x++) {
+                for (int y = 0; y < well[x].length; y++) {
+                    if (x == 0 || x == well.length - 1 || y == 0 || y == well[x].length - 1) {
+                        well[x][y] = tetrisColor[currentPiece];
+                    }
+                }
+            }
+        } else if (!status) {
+            for (int x = 0; x < well.length; x++) {
+                for (int y = 0; y < well[x].length; y++) {
+                    if (x == 0 || x == well.length - 1 || y == 0 || y == well[x].length - 1) {
+                        well[x][y] = Color.GRAY;
+                    }
+                }
+            }
+        }
+        repaint();
+
+    }
+
     private void nextPiece() {
         pieceOrigin = new Point(5, 1);
         distance = 0;
@@ -148,11 +172,30 @@ public class Tetris extends JPanel {
         width = getSize().width;
         height = getSize().height;
         sqHW = width / blockWidth;
+        if (status) {
+            wall_playmode();
 
-        for (int x = 0; x < well.length; x++) {
-            for (int y = 0; y < well[x].length; y++) {
-                g.setColor(well[x][y]);
-                g.fillRect(x * sqHW, y * sqHW, sqHW, sqHW);
+            for (int x = 0; x < well.length; x++) {
+                for (int y = 0; y < well[x].length; y++) {
+                    g.setColor(well[x][y]);
+                    g.fillRect(x * sqHW, y * sqHW, sqHW, sqHW);
+                }
+            }
+        } else if (!status) {
+            wall_playmode();
+
+            for (int x = 0; x < well.length; x++) {
+                for (int y = 0; y < well[x].length; y++) {
+                    g.setColor(well[x][y]);
+                    g.fillRect(x * sqHW, y * sqHW, sqHW, sqHW);
+                }
+            }
+        } else {
+            for (int x = 0; x < well.length; x++) {
+                for (int y = 0; y < well[x].length; y++) {
+                    g.setColor(well[x][y]);
+                    g.fillRect(x * sqHW, y * sqHW, sqHW, sqHW);
+                }
             }
         }
     }
@@ -178,7 +221,7 @@ public class Tetris extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         createWall(g);
-        if (!this.status.equals("PAUSE")) {
+        if (!restart) {
             drawPiece(g);
         }
         createLines(g);
@@ -216,6 +259,7 @@ public class Tetris extends JPanel {
         for (Point p : Tetraminos[currentPiece][rotation]) {
             well[p.x + pieceOrigin.x][p.y + pieceOrigin.y] = tetrisColor[currentPiece];
         }
+        this.rotation = 1;
         clearRows();
         repaint();
     }
@@ -268,18 +312,14 @@ public class Tetris extends JPanel {
             }
         }
         switch (numClears) {
-            case 1:
+            case 1 ->
                 score += 100;
-                break;
-            case 2:
+            case 2 ->
                 score += 300;
-                break;
-            case 3:
+            case 3 ->
                 score += 500;
-                break;
-            case 4:
+            case 4 ->
                 score += 800;
-                break;
         }
         if (score > 0 && clearCounter >= 1.00) {
             gameLevel += 50;
@@ -288,7 +328,6 @@ public class Tetris extends JPanel {
             if (tdelay > 50) {
                 delay = tdelay;
                 timer.setDelay((int) delay);
-                System.out.println(timer.getDelay());
             }
             clearCounter = 0;
         }
@@ -336,31 +375,31 @@ public class Tetris extends JPanel {
     public Color getNextColor() {
         return tetrisColor[nextPieceI];
     }
-    boolean restart = true;
 //this is method is for the start button to call
 
     public void startPause() {
 
-        if (status == null || status.equals("PAUSE")) {
+        if (!status) {
             //this is a restart then create a new piece and change the restart status to false
-            if (restart) {
+            if (restart == true) {
                 nextPiece();
                 restart = false;
-            }
 
+            }
+            timer.setDelay(1000 / gameLevel);
             timer.start();
-            System.out.println(timer.getDelay());
             isAbleToMove = true;
-            status = "START";
+            status = true;
             repaint();
-        } else {
+        } else if (status) {
             timer.stop();
             isAbleToMove = false;
-            status = "PAUSE";
+            status = false;
+
         }
     }
 
-    public String getStatus() {
+    public boolean getStatus() {
         return status;
     }
 
@@ -371,7 +410,7 @@ public class Tetris extends JPanel {
         timer.stop();
         //clear the score and statuses
         this.score = 0;
-        status = "PAUSE";
+        status = false;
         currentPiece = 7;
         gameLevel = 1;
         nextPieceI = 7;
