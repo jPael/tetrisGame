@@ -58,7 +58,7 @@ this is the part where we call the constructor to initialize our variables above
     Timer updateScore;
 
     public void panelLayout() {
-        nextTetris nextTetris = new nextTetris();
+        TetrisNext nextTetris = new TetrisNext();
         tetris = new Tetris();
         
         
