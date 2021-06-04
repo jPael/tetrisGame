@@ -18,7 +18,7 @@ import javax.swing.Timer;
  * @author jason
  */
 public class Tetris extends JPanel {
-    
+
 //all the points needed to create TETRAMINOS
     private final Point[][][] Tetraminos = {
         // I-Piece
@@ -84,7 +84,7 @@ public class Tetris extends JPanel {
     private int gameLevel = 1;
     private int distance;
     private int nextPieceI;
-    private static int width, height, sqHW, margin, blockHeight, blockWidth, currentPiece = 8, rotation;
+    private static int width, height, sqHW, blockHeight, blockWidth, currentPiece = 8, rotation;
     private ArrayList<Integer> nextPieces = new ArrayList<Integer>();
 
     private Timer timer;
@@ -99,7 +99,6 @@ public class Tetris extends JPanel {
 
     public Tetris() {
         isAbleToMove = false;
-        margin = 5;
         blockHeight = 23;
         blockWidth = 12;
         rotation = 1;
@@ -172,31 +171,15 @@ public class Tetris extends JPanel {
         width = getSize().width;
         height = getSize().height;
         sqHW = width / blockWidth;
-        if (status) {
-            wall_playmode();
 
-            for (int x = 0; x < well.length; x++) {
-                for (int y = 0; y < well[x].length; y++) {
-                    g.setColor(well[x][y]);
-                    g.fillRect(x * sqHW, y * sqHW, sqHW, sqHW);
-                }
-            }
-        } else if (!status) {
-            wall_playmode();
+        wall_playmode();
 
-            for (int x = 0; x < well.length; x++) {
-                for (int y = 0; y < well[x].length; y++) {
-                    g.setColor(well[x][y]);
-                    g.fillRect(x * sqHW, y * sqHW, sqHW, sqHW);
-                }
+        for (int x = 0; x < well.length; x++) {
+            for (int y = 0; y < well[x].length; y++) {
+                g.setColor(well[x][y]);
+                g.fillRect(x * sqHW, y * sqHW, sqHW, sqHW);
             }
-        } else {
-            for (int x = 0; x < well.length; x++) {
-                for (int y = 0; y < well[x].length; y++) {
-                    g.setColor(well[x][y]);
-                    g.fillRect(x * sqHW, y * sqHW, sqHW, sqHW);
-                }
-            }
+
         }
     }
 
@@ -399,7 +382,7 @@ public class Tetris extends JPanel {
         }
     }
 
-    public boolean getStatus() {
+    public boolean isPlaying() {
         return status;
     }
 
